@@ -1,7 +1,13 @@
+# Rust Project
 /target
 **/*.rs.bk
 
+# repository unique
 *.env
 *.vscode
 db/backup/*
 nohup.out
+
+# macOS
+.DS_Store
+._*

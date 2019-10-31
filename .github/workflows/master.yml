@@ -1,0 +1,40 @@
+name: master
+
+on:
+  push:
+    branches:
+    - master
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    
+    services:
+      mysql:
+        image: mysql
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+        - 3306
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Setup
+      run: |
+        rustup default nightly
+        sudo apt install -y libmysqlclient-dev
+    - name: Build
+      run: cargo build --verbose
+      env:
+        ROCKET_DATABASES: "{mysql={url=\"mysql://root:root@127.0.0.1/test\"}}"
+        DATABASE_URL: "mysql://root:root@127.0.0.1/test"
+        RUST_LOG: debug
+    - name: Run tests
+      run: cargo test --verbose
+    - name: Deploy Webhook
+      uses: joelwmale/webhook-action@1.0.0
+      env:
+        WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+      with:
+        data: "${{ secrets.WEBHOOK_SECRET }}"
